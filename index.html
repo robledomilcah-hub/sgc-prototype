@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sintang Grains Cooperative</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+:root{--cream:#fff8f5;--blush:#ffe4ec;--rose:#e8618c;--rose-d:#c94a74;--lilac:#ece3fb;--plum:#5b3a5a;--sage:#d3ecdc;--sage-d:#2f7a52;--err:#b3345a;--line:#f3cfdc}
+*{box-sizing:border-box}
+body{margin:0;font-family:Quicksand,system-ui,sans-serif;font-weight:500;background:var(--cream);color:var(--plum);line-height:1.5}
+header{background:linear-gradient(135deg,var(--blush),var(--lilac));padding:22px 16px 14px;text-align:center}
+h1{font-family:"DM Serif Display",Georgia,serif;font-weight:400;font-size:2rem;margin:0;color:var(--rose-d)}
+header p{margin:2px 0 0;font-size:.95rem}
+nav{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+nav button{border:2px solid var(--rose);background:#fff;color:var(--rose-d);padding:9px 16px;border-radius:99px;font:inherit;font-weight:700;cursor:pointer}
+nav button.on{background:var(--rose);color:#fff}
+main{max-width:860px;margin:0 auto;padding:18px 14px 50px}
+.panel{background:#fff;border:2px solid var(--line);border-radius:22px;padding:18px;margin-bottom:16px}
+h2{font-family:"DM Serif Display",Georgia,serif;font-weight:400;font-size:1.4rem;margin:0 0 4px;color:var(--rose-d)}
+.hint{margin:0 0 12px;font-size:.9rem;opacity:.8}
+label{display:block;font-weight:700;font-size:.9rem;margin:10px 0 4px}
+input,select{width:100%;padding:12px 14px;border:2px solid var(--line);border-radius:14px;font:inherit;color:var(--plum);background:var(--cream)}
+input:focus,select:focus,button:focus-visible{outline:3px solid var(--lilac);border-color:var(--rose)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:10px 18px;border-radius:99px;border:2px solid var(--line);background:var(--cream);font:inherit;font-weight:700;color:var(--plum);cursor:pointer}
+.chip.on{background:var(--lilac);border-color:var(--rose)}
+.btn{margin-top:14px;width:100%;padding:13px;border:0;border-radius:99px;background:var(--rose);color:#fff;font:inherit;font-weight:700;font-size:1.05rem;cursor:pointer}
+.btn:hover{background:var(--rose-d)}
+.btn.soft{background:var(--lilac);color:var(--plum);width:auto;padding:10px 18px;margin:8px 8px 0 0}
+.name{font-size:.9rem;min-height:1.3em;margin-top:4px;color:var(--sage-d);font-weight:700}
+.msg{margin-top:12px;padding:11px 14px;border-radius:14px;font-weight:700}
+.msg.ok{background:var(--sage);color:var(--sage-d)}
+.msg.bad{background:#ffd9e2;color:var(--err);border:2px solid var(--err)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.card{border-radius:18px;padding:14px;background:var(--blush)}
+.card:nth-child(2){background:var(--lilac)}.card:nth-child(3){background:var(--sage)}
+.card b{display:block;font-size:1.8rem;font-family:"DM Serif Display",Georgia,serif;font-weight:400}
+.wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--rose-d)}
+.receipt{border:2px dashed var(--rose);border-radius:18px;padding:18px;background:var(--cream);margin-top:14px}
+.receipt h3{font-family:"DM Serif Display",Georgia,serif;font-weight:400;margin:0 0 6px;color:var(--rose-d)}
+.hide{display:none}
+@media print{body *{visibility:hidden}.receipt,.receipt *,#report,#report *{visibility:visible}.receipt{position:absolute;left:0;top:0;width:100%}#report.printing{position:absolute;left:0;top:0;width:100%}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Sintang Grains Cooperative</h1>
+  <p>Delivery logging, live stock, and order slips</p>
+  <nav>
+    <button data-tab="clerk" class="on">Clerk counter</button>
+    <button data-tab="dash">Manager dashboard</button>
+    <button data-tab="order">Buyer orders</button>
+  </nav>
+</header>
+<main>
+
+<section id="clerk">
+  <div class="panel">
+    <h2>Record a delivery</h2>
+    <p class="hint">Type the Farmer ID, press Enter, type kg, press Enter. Done.</p>
+    <label for="fid">Farmer ID</label>
+    <input id="fid" list="farmers" placeholder="e.g. F001" autocomplete="off" autofocus>
+    <datalist id="farmers"></datalist>
+    <div class="name" id="fname"></div>
+    <label>Grain type</label>
+    <div class="chips" id="grainChips"></div>
+    <label for="kg">Quantity (kg)</label>
+    <input id="kg" type="number" min="1" inputmode="numeric" placeholder="e.g. 250">
+    <button class="btn" id="saveDel">Save delivery</button>
+    <div id="delMsg"></div>
+  </div>
+  <div class="panel">
+    <h2>Farmer history</h2>
+    <p class="hint">Shows up for the farmer ID typed above. Useful for disputes.</p>
+    <div class="wrap" id="history"></div>
+  </div>
+</section>
+
+<section id="dash" class="hide">
+  <div class="panel">
+    <h2>Stock on hand</h2>
+    <p class="hint">Updates by itself every time a delivery or order is saved.</p>
+    <div class="grid" id="stockCards"></div>
+  </div>
+  <div class="panel" id="report">
+    <h2>Monthly board summary</h2>
+    <p class="hint" id="monthLabel"></p>
+    <div class="wrap"><table id="monthTable"></table></div>
+    <button class="btn soft" id="printReport">Print summary</button>
+    <button class="btn soft" id="resetData">Reset demo data</button>
+  </div>
+  <div class="panel">
+    <h2>Latest deliveries</h2>
+    <div class="wrap" id="latest"></div>
+  </div>
+</section>
+
+<section id="order" class="hide">
+  <div class="panel">
+    <h2>Place a buyer order</h2>
+    <p class="hint">The order is only confirmed if there is enough stock.</p>
+    <label for="buyer">Buyer name</label>
+    <input id="buyer" placeholder="e.g. Reyes Grain Trading">
+    <label for="ograin">Grain type</label>
+    <select id="ograin"></select>
+    <div class="name" id="avail"></div>
+    <label for="okg">Quantity (kg)</label>
+    <input id="okg" type="number" min="1" inputmode="numeric" placeholder="e.g. 500">
+    <button class="btn" id="confirmOrder">Confirm order</button>
+    <div id="ordMsg"></div>
+    <div id="receipt"></div>
+  </div>
+  <div class="panel">
+    <h2>Order list</h2>
+    <div class="wrap" id="orders"></div>
+  </div>
+</section>
+
+</main>
+<script>
+const GRAINS = ["Palay", "Mais", "Munggo"];
+const FARMERS = {F001:"Aling Rosa Dela Cruz", F002:"Mang Ben Santos", F003:"Lita Reyes", F004:"Mang Dado Cruz", F005:"Nena Villanueva"};
+let S = {deliveries: [], orders: []};
+try { const x = localStorage.getItem("sgc"); if (x) S = JSON.parse(x); } catch (e) {}
+const save = () => { try { localStorage.setItem("sgc", JSON.stringify(S)); } catch (e) {} };
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = n => Number(n).toLocaleString("en-PH");
+const when = t => new Date(t).toLocaleString("en-PH", {dateStyle:"medium", timeStyle:"short"});
+const sum = (arr, g) => arr.filter(x => x.grain === g).reduce((a, x) => a + x.kg, 0);
+const stock = g => sum(S.deliveries, g) - sum(S.orders, g);
+
+if (!S.deliveries.length) {
+  const now = Date.now();
+  S.deliveries = [
+    {farmer:"F001", grain:"Palay", kg:300, t:now - 3e6},
+    {farmer:"F002", grain:"Mais", kg:180, t:now - 2e6},
+    {farmer:"F003", grain:"Munggo", kg:90, t:now - 1e6}
+  ];
+  save();
+}
+
+let grain = GRAINS[0], t0 = null;
+
+// Tabs
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("nav button").forEach(x => x.classList.toggle("on", x === b));
+  ["clerk", "dash", "order"].forEach(id => $(id).classList.toggle("hide", id !== b.dataset.tab));
+  render();
+  if (b.dataset.tab === "clerk") $("fid").focus();
+});
+
+// Clerk
+$("farmers").innerHTML = Object.entries(FARMERS).map(([id, n]) => `<option value="${id}">${esc(n)}</option>`).join("");
+$("grainChips").innerHTML = GRAINS.map(g => `<button type="button" class="chip" data-g="${g}">${g}</button>`).join("");
+$("ograin").innerHTML = GRAINS.map(g => `<option>${g}</option>`).join("");
+document.querySelectorAll(".chip").forEach(c => c.onclick = () => { grain = c.dataset.g; render(); $("kg").focus(); });
+
+$("fid").addEventListener("input", () => {
+  if (!t0) t0 = Date.now();
+  $("fid").value = $("fid").value.toUpperCase();
+  render();
+});
+$("fid").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); $("kg").focus(); } });
+$("kg").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); saveDelivery(); } });
+$("saveDel").onclick = saveDelivery;
+
+function saveDelivery() {
+  const farmer = $("fid").value.trim().toUpperCase(), kg = parseInt($("kg").value, 10);
+  if (!FARMERS[farmer]) return say("delMsg", "Farmer ID not found. Try F001 to F005.", false);
+  if (!kg || kg < 1) return say("delMsg", "Enter the quantity in kg.", false);
+  const secs = t0 ? Math.max(1, Math.round((Date.now() - t0) / 1000)) : 1;
+  S.deliveries.push({farmer, grain, kg, t: Date.now()});
+  save();
+  $("fid").value = ""; $("kg").value = ""; t0 = null;
+  render();
+  say("delMsg", `Saved: ${FARMERS[farmer]}, ${fmt(kg)} kg ${grain} (${secs} sec).`, true);
+  $("fid").focus();
+}
+
+function say(id, text, ok) { $(id).innerHTML = `<div class="msg ${ok ? "ok" : "bad"}" role="alert">${esc(text)}</div>`; }
+
+// Orders
+$("ograin").onchange = renderAvail;
+$("okg").addEventListener("keydown", e => { if (e.key === "Enter") confirmOrder(); });
+$("confirmOrder").onclick = confirmOrder;
+
+function renderAvail() { $("avail").textContent = `Available now: ${fmt(stock($("ograin").value))} kg`; }
+
+function confirmOrder() {
+  const buyer = $("buyer").value.trim(), g = $("ograin").value, kg = parseInt($("okg").value, 10);
+  if (!buyer) return say("ordMsg", "Enter the buyer name.", false);
+  if (!kg || kg < 1) return say("ordMsg", "Enter the quantity in kg.", false);
+  const have = stock(g);
+  if (kg > have) {
+    $("receipt").innerHTML = "";
+    return say("ordMsg", `Cannot confirm. You ordered ${fmt(kg)} kg but only ${fmt(have)} kg of ${g} is available.`, false);
+  }
+  const o = {no: "SGC-" + String(S.orders.length + 1).padStart(4, "0"), buyer, grain: g, kg, t: Date.now()};
+  S.orders.push(o); save();
+  $("buyer").value = ""; $("okg").value = "";
+  $("ordMsg").innerHTML = `<div class="msg ok" role="alert">Order confirmed. Stock reserved.</div>`;
+  $("receipt").innerHTML = `<div class="receipt"><h3>Order confirmation ${o.no}</h3>
+    <div>Buyer: <b>${esc(o.buyer)}</b></div><div>Grain: <b>${o.grain}</b></div>
+    <div>Quantity: <b>${fmt(o.kg)} kg</b></div><div>Date: ${when(o.t)}</div>
+    <div>Stock confirmed by Sintang Grains Cooperative.</div>
+    <button class="btn soft" onclick="window.print()">Print slip</button></div>`;
+  render();
+}
+
+// Dashboard
+$("printReport").onclick = () => { const r = $("report"); r.classList.add("printing"); window.print(); r.classList.remove("printing"); };
+$("resetData").onclick = () => { if (confirm("Delete all deliveries and orders?")) { S = {deliveries: [], orders: []}; try { localStorage.removeItem("sgc"); } catch (e) {} location.reload(); } };
+
+function table(head, rows) {
+  if (!rows.length) return "<p class='hint'>Nothing yet.</p>";
+  return `<table><tr>${head.map(h => `<th>${h}</th>`).join("")}</tr>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join("")}</tr>`).join("")}</table>`;
+}
+
+function render() {
+  document.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c.dataset.g === grain));
+  const fid = $("fid").value.trim().toUpperCase();
+  $("fname").textContent = FARMERS[fid] ? "✓ " + FARMERS[fid] : "";
+  const hist = S.deliveries.filter(d => d.farmer === fid).slice().reverse();
+  $("history").innerHTML = fid ? table(["Date", "Grain", "kg"], hist.map(d => [when(d.t), d.grain, fmt(d.kg)])) : "<p class='hint'>Type a farmer ID to see their deliveries.</p>";
+
+  $("stockCards").innerHTML = GRAINS.map(g => `<div class="card">${g}<b>${fmt(stock(g))} kg</b><small>in ${fmt(sum(S.deliveries, g))} · ordered ${fmt(sum(S.orders, g))}</small></div>`).join("");
+
+  const now = new Date(), same = x => { const d = new Date(x.t); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); };
+  $("monthLabel").textContent = now.toLocaleString("en-PH", {month: "long", year: "numeric"});
+  const md = S.deliveries.filter(same), mo = S.orders.filter(same);
+  $("monthTable").innerHTML = table(["Grain", "Deliveries", "kg received", "kg ordered", "Stock now"],
+    GRAINS.map(g => [g, md.filter(x => x.grain === g).length, fmt(sum(md, g)), fmt(sum(mo, g)), "<b>" + fmt(stock(g)) + " kg</b>"]));
+
+  $("latest").innerHTML = table(["Date", "Farmer", "Grain", "kg"], S.deliveries.slice(-8).reverse().map(d => [when(d.t), esc(FARMERS[d.farmer] || d.farmer), d.grain, fmt(d.kg)]));
+  $("orders").innerHTML = table(["No.", "Buyer", "Grain", "kg", "Date"], S.orders.slice().reverse().map(o => [o.no, esc(o.buyer), o.grain, fmt(o.kg), when(o.t)]));
+  renderAvail();
+}
+render();
+</script>
+</body>
+</html>
